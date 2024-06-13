@@ -8,19 +8,23 @@ pygame.init()
 width = 800
 height = 600
 
-player_imgs = [pygame.image.load(f'player_{i}.png') for i in range(8)]
+player_imgs = [pygame.image.load(f'imagens//player_{i}.png') for i in range(8)]
 player_imgs = [pygame.transform.scale(image, (100, 100)) for image in player_imgs]
+
+bg_img = pygame.image.load('bg imagens//bg.png')
+bg_img = pygame.transform.scale(bg_img, (width, height))
 
 # Player:
 player_x = int(width / 4)
 player_y = height - 120
-player_width = 100
-player_height = 100
+player_width = 80  
+player_height = 85 
 jump_height = 15
 gravity = 1
 y_velocity = 0
 x_velocity = 1
 jumping = False
+attacking = False
 
 # Animação
 player_speed_img = 0.3
@@ -34,9 +38,9 @@ floor_y = height - floor_height
 # Obstáculos:
 obstacle_width = 20
 obstacle_height = 20
-x_obs = randint(0, width)
+x_obs = randint(400, width)
 y_obs = floor_y - obstacle_height
-obs_speed = 1.5
+obs_speed = 4
 
 # Pontuação do Player:
 pontos = 0
@@ -55,11 +59,19 @@ def player_move():
         y_velocity += gravity
         player_y += y_velocity
         
-        # Verificar se o jogador atingiu o chão
         if player_y >= floor_y - player_height:
             player_y = floor_y - player_height
             jumping = False
             y_velocity = 0
+
+def player_attack():
+    global attacking, x_obs
+
+    attack_rect = pygame.Rect(player_x + player_width, player_y, 50, player_height)  # Ajuste as dimensões conforme necessário
+
+    if attack_rect.colliderect(pygame.Rect(x_obs, y_obs, obstacle_width, obstacle_height)):
+        x_obs = width + randint(0, 400)
+        attacking = False
 
 def move_obstacles_1():
     global x_obs, pontos, obs_speed
@@ -71,10 +83,17 @@ def move_obstacles_1():
         pontos += 1
         obs_speed += 0.25
 
+def check_collision(player_x, player_y, player_width, player_height, x_obs, y_obs, obstacle_width, obstacle_height, margin=5):
+    if (player_x + margin < x_obs + obstacle_width and
+        player_x + player_width - margin > x_obs and
+        player_y + margin < y_obs + obstacle_height and
+        player_y + player_height - margin > y_obs):
+        return True
+    return False
 
 while True:
     clock.tick(60)
-    screen.fill((255, 255, 255))
+    screen.blit(bg_img, (0, 0))
 
     distancia_msg = f'Distancia: {pontos}'
     texto_formatado = font.render(distancia_msg, True, (0, 0, 0))
@@ -88,6 +107,8 @@ while True:
             if event.key == K_w and not jumping:
                 jumping = True
                 y_velocity = -jump_height
+            elif event.key == K_SPACE and not attacking:  # Supondo que a tecla de ataque seja a barra de espaço
+                attacking = True
 
     player_move()
     move_obstacles_1()
@@ -97,13 +118,22 @@ while True:
         player_counter = 0
     player_index = int(player_counter)
     
-    player = screen.blit(player_imgs[player_index], (player_x, player_y))
+    # Atualizar a posição do jogador e criar a "hit box"
+    player_rect = pygame.Rect(player_x, player_y, player_width, player_height)
+    screen.blit(player_imgs[player_index], (player_x, player_y))
 
     floor = pygame.draw.rect(screen, (124, 252, 0), (0, floor_y, floor_width, floor_height))
 
-    obstacle = pygame.draw.rect(screen, (255, 0, 0), (x_obs, y_obs, obstacle_width, obstacle_height))
+    obstacle_rect = pygame.Rect(x_obs, y_obs, obstacle_width, obstacle_height)
+    pygame.draw.rect(screen, (255, 0, 0), obstacle_rect)
 
-    if player.colliderect(obstacle):
+    if attacking:
+        player_attack()
+        attack_rect = pygame.Rect(player_x + player_width, player_y, 50, player_height)  # Ajuste as dimensões conforme necessário
+        pygame.draw.rect(screen, (255, 255, 0), attack_rect)  # Desenhe a "hit box" do ataque (opcional)
+
+    # Verificar colisão com margem de erro
+    if check_collision(player_x, player_y, player_width, player_height, x_obs, y_obs, obstacle_width, obstacle_height):
         print('Game Over')
         pygame.quit()
         exit()
