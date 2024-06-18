@@ -5,6 +5,7 @@ from sys import exit
 
 pygame.init()
 
+<<<<<<< HEAD
 # Tela
 width = 800
 height = 600
@@ -14,12 +15,18 @@ pygame.display.set_caption('Dash Escape')
 clock = pygame.time.Clock()
 
 # Carregar Imagens
+=======
+width = 800
+height = 600
+
+>>>>>>> c328dbf5e4efdf31b2d23cd0c3f19129a940c8bb
 player_imgs = [pygame.image.load(f'imagens//player_{i}.png') for i in range(8)]
 player_imgs = [pygame.transform.scale(image, (100, 100)) for image in player_imgs]
 
 bg_img = pygame.image.load('bg_imagens//bg.png')
 bg_img = pygame.transform.scale(bg_img, (width, height))
 
+<<<<<<< HEAD
 # Variaveis do Jogo:
 game_pause = True
 game_over = False
@@ -30,6 +37,13 @@ player_x = int(width / 4)
 player_y = height - 120
 player_width = 80
 player_height = 85
+=======
+# Player:
+player_x = int(width / 4)
+player_y = height - 120
+player_width = 80  
+player_height = 85 
+>>>>>>> c328dbf5e4efdf31b2d23cd0c3f19129a940c8bb
 jump_height = 15
 gravity = 1
 y_velocity = 0
@@ -37,7 +51,10 @@ x_velocity = 1
 jumping = False
 attacking = False
 attacking_flyers = False
+<<<<<<< HEAD
 player_died = False
+=======
+>>>>>>> c328dbf5e4efdf31b2d23cd0c3f19129a940c8bb
 
 # Animação
 player_speed_img = 0.3
@@ -57,6 +74,10 @@ obs_speed = 4
 
 # Obstáculos Voadores:
 height_obs_flyers = 20
+<<<<<<< HEAD
+=======
+
+>>>>>>> c328dbf5e4efdf31b2d23cd0c3f19129a940c8bb
 obstacles_flyers_width = 30
 obstacle_flyers_height = 20
 x_obs_flyers = randint(400, width)
@@ -66,6 +87,7 @@ obs_speed_flyers = 2
 # Pontuação do Player:
 pontos = 0
 
+<<<<<<< HEAD
 
 def start():
     screen.fill((255, 255, 255))
@@ -75,6 +97,14 @@ def start():
     text_start = font.render('Pressione "Enter" para iniciar', True, (0, 0, 0))
     screen.blit(text_start, (width/2 - text_start.get_width()/2, height/2))
     pygame.display.update()
+=======
+font = pygame.font.SysFont('arial', 40, bold=True, italic=True)
+screen = pygame.display.set_mode((width, height))
+pygame.display.set_caption('Runner')
+clock = pygame.time.Clock()
+
+died = False
+>>>>>>> c328dbf5e4efdf31b2d23cd0c3f19129a940c8bb
 
 def player_move():
     global player_x, player_y, y_velocity, jumping
@@ -142,6 +172,7 @@ def check_collision_flyers(player_x, player_y, player_width, player_height, x_ob
         return True
     return False
 
+<<<<<<< HEAD
 def main_game():
     global game_pause, game_over, player_x, player_y, player_width, player_height, player_speed_img, player_counter, player_died, pontos, jumping, attacking, attacking_flyers, y_velocity, x_velocity, x_obs, y_obs, x_obs_flyers, y_obs_flyers, obs_speed, obs_speed_flyers, died
 
@@ -229,3 +260,66 @@ def main_game():
         pygame.display.update()
 
 main_game()
+=======
+while True:
+    clock.tick(60)
+    screen.blit(bg_img, (0, 0))
+
+    distancia_msg = f'Distancia: {pontos}'
+    texto_formatado = font.render(distancia_msg, True, (0, 0, 0))
+
+    for event in pygame.event.get():
+        if event.type == QUIT:
+            pygame.quit()
+            exit()
+        
+        if event.type == KEYDOWN:
+            if event.key == K_w and not jumping:
+                jumping = True
+                y_velocity = -jump_height
+            elif event.key == K_SPACE and not attacking:
+                attacking = True
+            elif event.key == K_f and not attacking:
+                attacking_flyers = True
+
+    player_move()
+    move_obstacles()
+    move_obstacles_flyers()
+
+    player_counter += player_speed_img
+    if player_counter >= len(player_imgs):
+        player_counter = 0
+    player_index = int(player_counter)
+    
+    # Atualizar a posição do jogador e criar a "hit box"
+    player_rect = pygame.Rect(player_x, player_y, player_width, player_height)
+    screen.blit(player_imgs[player_index], (player_x, player_y))
+
+    floor = pygame.draw.rect(screen, (124, 252, 0), (0, floor_y, floor_width, floor_height))
+
+    obstacle_rect = pygame.Rect(x_obs, y_obs, obstacle_width, obstacle_height)
+    pygame.draw.rect(screen, (255, 0, 0), obstacle_rect)
+
+    obstacle_flyers_rect = pygame.Rect(x_obs_flyers, y_obs_flyers, obstacles_flyers_width, obstacle_flyers_height)
+    pygame.draw.rect(screen, (0, 0, 255), obstacle_flyers_rect)
+
+    if attacking:
+        player_attack()
+        attack_rect = pygame.Rect(player_x + player_width, player_y, 50, player_height)
+        pygame.draw.rect(screen, (255, 255, 0), attack_rect)
+
+    if attacking_flyers:
+        player_attack_flyers()
+        attack_flayers_rect = pygame.Rect(player_x + player_width, player_y, 50, player_height)
+        pygame.draw.rect(screen, (255, 0, 255), attack_flayers_rect)
+        
+    # Verificar colisão com margem de erro
+    if check_collision(player_x, player_y, player_width, player_height, x_obs, y_obs, obstacle_width, obstacle_height) or check_collision_flyers(player_x, player_y, player_width, player_height, x_obs_flyers, y_obs_flyers, obstacles_flyers_width, obstacle_flyers_height):
+        print('Game Over')
+        pygame.quit()
+        exit()
+
+    screen.blit(texto_formatado, (450, 50))
+
+    pygame.display.update()
+>>>>>>> c328dbf5e4efdf31b2d23cd0c3f19129a940c8bb
